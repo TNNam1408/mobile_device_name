@@ -1,0 +1,60 @@
+name: Publish on Tag Push (Pub.dev OIDC)
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  publish-to-pub:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Bắt buộc để xác thực OIDC với pub.dev khi xuất bản tự động
+    env:
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Dart & Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Run Tests
+        run: flutter test
+
+      - name: Verify Package Dry-run
+        run: dart pub publish --dry-run
+
+      - name: Publish to pub.dev via OIDC
+        run: dart pub publish --force
+
+      - name: Send Email Notification
+        if: always() && env.MAIL_USERNAME != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "🚀 [Pub.dev Release] Đã phát hành phiên bản ${{ github.ref_name }} thành công!"
+          to: ${{ secrets.MAIL_TO }}
+          from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
+          body: |
+            Xin chào,
+
+            Phiên bản mới của package mobile_device_name đã được phát hành thành công lên pub.dev thông qua GitHub Actions OIDC:
+
+            - Phiên bản: ${{ github.ref_name }}
+            - Trạng thái: ${{ job.status }}
+            - Commit: ${{ github.sha }}
+            - Repository: ${{ github.repository }}
+            - Link package pub.dev: https://pub.dev/packages/mobile_device_name
+            - Chi tiết log chạy: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
