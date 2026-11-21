@@ -10,7 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # Bắt buộc để xác thực OIDC không mật khẩu với pub.dev
+      id-token: write # Bắt buộc để cấp quyền tạo OIDC token
+    env:
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
 
     steps:
       - name: Checkout Repository
@@ -31,5 +33,40 @@ jobs:
       - name: Verify Package Dry-run
         run: dart pub publish --dry-run
 
+      # Lấy OIDC token chính thức từ GitHub cấp riêng cho pub.dev
+      - name: Get OIDC Token for pub.dev
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let pubToken = await core.getIDToken('https://pub.dev');
+            core.exportVariable('PUB_TOKEN', pubToken);
+
+      # Nạp OIDC token vào trình quản lý xác thực của Dart Pub
+      - name: Authenticate with pub.dev
+        run: |
+          dart pub token add https://pub.dev --env-var PUB_TOKEN
+
+      # Xuất bản hoàn toàn tự động không cần trình duyệt
       - name: Publish to pub.dev via OIDC
         run: dart pub publish --force
+
+      # Gửi email thông báo CHÍNH XÁC KHI PUB.DEV XUẤT BẢN THÀNH CÔNG
+      - name: Send Email Notification on Publish
+        if: always() && env.MAIL_USERNAME != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "🎉 [Pub.dev Release] Phiên bản ${{ github.ref_name }} đã lên sóng pub.dev thành công!"
+          to: ${{ secrets.MAIL_TO }}
+          from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
+          body: |
+            Xin chào,
+
+            Tiến trình xuất bản thư viện mobile_device_name lên pub.dev đã hoàn tất:
+            - Phiên bản: ${{ github.ref_name }}
+            - Trạng thái xuất bản: ${{ job.status }}
+            - Xem package trực tiếp trên pub.dev: https://pub.dev/packages/mobile_device_name
+            - Chi tiết log chạy: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
