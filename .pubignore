@@ -8,10 +8,9 @@ build/
 android/
 ios/
 
-# Tooling, CI workflows & release scripts
+# Tooling and CI workflows
 .github/
 tool/
-release.sh
 
 # IDE & Editor files
 *.iml
