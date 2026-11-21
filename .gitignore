@@ -35,9 +35,6 @@ migrate_working_dir/
 
 # Symbolication related
 app.*.symbols
-
-# Local documentation
-AUTO_UPDATE_WORKFLOW.md
 app.*.map.json
 
 # Android Studio will place build artifacts here

@@ -8,9 +8,8 @@ build/
 android/
 ios/
 
-# Tooling and CI workflows
+# CI workflows
 .github/
-tool/
 
 # IDE & Editor files
 *.iml
@@ -20,4 +19,3 @@ tool/
 # System & temporary files
 .DS_Store
 *.log
-AUTO_UPDATE_WORKFLOW.md

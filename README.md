@@ -6,7 +6,7 @@
 
 A blazing-fast, **100% offline** Flutter package that converts raw hardware model identifiers (such as Android `Build.MODEL` and Apple machine identifiers) into clean, consumer-friendly commercial marketing names in **$O(1)$ constant time**.
 
-Powered by a pre-indexed database of **66,800+ devices** synchronizing automatically with official **Google Play Supported Devices** and **Apple IPSW & AppleDB APIs**.
+Powered by a pre-indexed, memory-optimized database of **66,800+ devices** synchronizing official **Google Play Supported Devices** and **Apple hardware catalogs**.
 
 ---
 
@@ -14,11 +14,11 @@ Powered by a pre-indexed database of **66,800+ devices** synchronizing automatic
 
 - **⚡ Instant $O(1)$ Lookup**: Single-hash table architecture with automatic lowercase normalization and whitespace trimming. Zero UI thread stutter or frame drops.
 - **📱 66,800+ Devices Out-of-the-Box**:
-  - **Android**: Full coverage of Samsung, Google Pixel, Xiaomi, OnePlus, Oppo, Vivo, Motorola, Sony, TCL, and more.
-  - **Apple**: Complete catalog covering all generations of iPhone (from original to iPhone 16/17/18/e/Air/Duo), iPad (Standard, mini, Air, Pro M2/M3/M4), Apple Watch (Series 1–12, SE, Ultra 1–4), Apple Vision Pro, Apple TV, and Simulators.
-- **🛡️ 100% Offline & Private**: Zero runtime network requests. Does not leak device information to any external server.
-- **🔄 Monthly Automated Cloud Sync**: Equipped with a pre-configured GitHub Actions Cron workflow that updates the database on the 1st of every month at zero cost.
-- **📦 Memory-Optimized**: Unified single-dictionary design cutting RAM usage by 50% compared to dual-mapping implementations.
+  - **Android**: Comprehensive coverage of Samsung, Google Pixel, Xiaomi, OnePlus, Oppo, Vivo, Motorola, Sony, Realme, TCL, and more.
+  - **Apple**: Complete catalog covering all generations of iPhone, iPad (Standard, mini, Air, Pro M2/M3/M4), Apple Watch (Series 1–10, SE, Ultra 1–2), Apple Vision Pro, Apple TV, and Simulators.
+- **🛡️ 100% Offline & Privacy-First**: Zero runtime network requests. Does not leak user hardware or device information to any external server.
+- **📦 Memory-Optimized**: Unified single-dictionary design cutting RAM usage by 50% compared to traditional dual-mapping implementations.
+- **🔄 Continuously Maintained**: Database is regularly updated to include newly released devices and chipsets.
 
 ---
 
@@ -26,7 +26,7 @@ Powered by a pre-indexed database of **66,800+ devices** synchronizing automatic
 
 ### 1. Installation
 
-Add the package to your `pubspec.yaml`:
+Add `mobile_device_name` to your `pubspec.yaml`:
 
 ```bash
 flutter pub add mobile_device_name
@@ -36,7 +36,7 @@ Or manually:
 
 ```yaml
 dependencies:
-  mobile_device_name: ^1.0.0
+  mobile_device_name: ^1.0.1
 ```
 
 ### 2. Initialization
@@ -50,7 +50,7 @@ import 'package:mobile_device_name/mobile_device_name.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load the device database into memory
+  // Preload the device database into memory
   await MobileDeviceName.instance.initialize();
 
   runApp(const MyApp());
@@ -102,7 +102,7 @@ print(name); // "Samsung Galaxy S23 Ultra"
 
 ## 📱 Real-World Integration with `device_info_plus`
 
-Here is the standard pattern to resolve the current physical device's marketing name:
+Here is the standard pattern to resolve the current physical device's commercial marketing name:
 
 ```dart
 import 'dart:io';
@@ -135,8 +135,8 @@ Future<String> getCurrentDeviceMarketingName() async {
 
 | Method / Property | Return Type | Description |
 | :--- | :--- | :--- |
-| `initialize({String? assetPath, Map? initialMap})` | `Future<void>` | Preloads the database from asset bundle. |
-| `getMarketingName(String model, {String? device, String? fallback})` | `String` | Synchronous $O(1)$ resolver with case-insensitivity. |
+| `initialize({String? assetPath, Map? initialMap})` | `Future<void>` | Preloads the database from asset bundle into memory. |
+| `getMarketingName(String model, {String? device, String? fallback})` | `String` | Synchronous $O(1)$ resolver with case-insensitivity and trim. |
 | `resolve(String model, {String? device, String? fallback})` | `Future<String>` | Asynchronous resolver that auto-initializes if needed. |
 | `loadRawMap(Map<String, String> map)` | `void` | Directly injects a custom lookup map (ideal for unit testing). |
 | `deviceCount` | `int` | Total number of indexed devices currently in memory. |
@@ -144,29 +144,12 @@ Future<String> getCurrentDeviceMarketingName() async {
 
 ---
 
-## ⚙️ Automated Cloud Sync via GitHub Actions
+## 🔄 Continuous Database Updates
 
-This repository includes a scheduled GitHub Actions workflow (`.github/workflows/update_device_map.yml`):
-- **Schedule**: Automatically runs at `00:00 UTC` on the 1st of every month (`0 0 1 * *`).
-- **Actions**:
-  1. Fetches the latest Android database from **Google Play Supported Devices**.
-  2. Synchronizes the latest Apple hardware IDs from **IPSW Downloads API** & **AppleDB**.
-  3. Formats, deduplicates, and compiles into `assets/devices_map.json`.
-  4. Automatically commits and pushes changes if new devices are released.
-  5. *(Optional)* Sends an email notification report upon completion.
-
-### Running the Crawler Locally
-
-To manually trigger the crawler on your development machine:
-
-```bash
-# Fetch and merge both Android and Apple devices into assets/devices_map.json
-python3 tool/update_devices.py
-
-# Optional flags:
-python3 tool/update_devices.py --apple-only   # Update Apple devices only
-python3 tool/update_devices.py --skip-apple   # Update Android devices only
-```
+The underlying device database is continuously maintained to support newly launched hardware:
+- **Android**: Regularly synchronized with official Google Play device support catalogs.
+- **Apple**: Rapidly updated with the latest Apple machine IDs as soon as new iPhones, iPads, Apple Watches, or Vision devices are released.
+- **Zero Runtime Config**: All updates are packaged directly into new library releases, requiring zero network calls or manual indexing in your apps.
 
 ---
 
