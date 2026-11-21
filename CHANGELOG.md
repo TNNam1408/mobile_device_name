@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 - 2026-11-21
+
+- Clean library exports, optimize RAM by 50%, reduce package archive size to ~470KB, move demo UI to example.
+
 ## 1.0.0
 
 - Initial release.
