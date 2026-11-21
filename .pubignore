@@ -1,0 +1,22 @@
+# Build artifacts & caches
+build/
+.dart_tool/
+.pub-cache/
+.pub/
+
+# Native runners (not needed for pure Flutter library package)
+android/
+ios/
+
+# Tooling and CI workflows
+.github/
+tool/
+
+# IDE & Editor files
+*.iml
+.idea/
+.vscode/
+
+# System & temporary files
+.DS_Store
+*.log
